@@ -1,18 +1,27 @@
 ---
+import { getProductsByPage } from '@/actions/products/get-products-by-page.action';
+import ProductList from '@/components/products/ProductList';
 import MainLayout from '@/layouts/MainLayout.astro';
-import { getSession } from 'auth-astro/server';
+import { actions } from 'astro:actions';
+// import { getSession } from 'auth-astro/server';
 
-const session = await getSession(Astro.request);
+// const session = await getSession(Astro.request);
+// const {user} = session ?? {};
+
+const { data , error } = await Astro.callAction(actions.getProductsByPage,{});
+
+if(error){
+  return Astro.redirect('/');
+}
 
 
-const {user} = session ?? {};
+const {products, totalPages} = data;
+
+// console.log(products)
 ---
 
 <MainLayout>
-  <h1 class="text-3xl">Home Page</h1>
-  <pre>
-    <code>
-      {JSON.stringify(user)}
-    </code>
-  </pre>
+  <h1 class="text-3xl">Listado de productos</h1>
+
+  <ProductList products={products} client:idle />
 </MainLayout>
