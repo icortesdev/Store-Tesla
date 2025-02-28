@@ -24,7 +24,7 @@ const ProductCard = ({ product }: Props) => {
          onMouseLeave={() => setCurrentImage(images[0])}
          />
         <h4>{product.title}</h4>
-        <p>{product.price}</p>
+        <p>{product.price}$</p>
       </a>
     </>
   );
