@@ -19,26 +19,7 @@ const { isLoggedIn, isAdmin } = Astro.locals;
 
       <li class="font-semibold text-gray-700">
         <a href="/">Home</a>
-      </li>
-      {
-        isAdmin && (
-          <li class="font-semibold text-gray-700">
-            <a href="/admin/dashboard">Admin</a>
-          </li>
-        )
-      }
-
-      {
-        !isLoggedIn ? (
-          <li class="font-semibold text-gray-700">
-            <a href="/login">Ingresar</a>
-          </li>
-        ) : (
-          <li id="logout" class="font-semibold text-gray-700">
-            <a href="#">Salir</a>
-          </li>
-        )
-      }
+    
     </ul>
   </div>
 </nav>
