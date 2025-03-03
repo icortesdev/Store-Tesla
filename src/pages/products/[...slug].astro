@@ -43,7 +43,7 @@ const {product, images} = data;
         <button class="btn-quantity">+</button>
       </div>
 
-      <button class="mt-5 bg-blue-500 text-white p-3 w-full"
+      <button class="button mt-5 bg-blue-500 text-white p-3 w-full cursor-pointer disabled:bg-grey-500"
         >Añadir al carrito</button
       >
 
@@ -56,6 +56,8 @@ const {product, images} = data;
 </MainLayout>
 
 <script>
+import { CartCookiesClient } from "@/utils";
+
 const sizeElements = document.querySelectorAll('li');
 
 sizeElements.forEach((liElement) => {
@@ -88,14 +90,18 @@ addToCardButton.addEventListener('click', () => {
   if (!size) {
     return alert('Selecciona una talla');
   }
+
 addToCardButton.disabled = true;
 
-console.log({
-   id: productId.value,
+
+CartCookiesClient.addItem({
+  productId: productId.value,
   size: size,
   quantity: quantity,
 });
 
+//TODO: Cambiar luego cuando tengammos los viwTransitions
+window.location.href = '/cart';
 });
   
 </script>

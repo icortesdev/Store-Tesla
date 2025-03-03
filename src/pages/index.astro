@@ -9,6 +9,9 @@ import { actions } from 'astro:actions';
 // const session = await getSession(Astro.request);
 // const {user} = session ?? {};
 
+const productsInCartCookie = Astro.cookies.get('cart')?.json() ?? [];
+console.log(productsInCartCookie);
+
 const { data , error } = await Astro.callAction(actions.getProductsByPage,{});
 
 if(error){
