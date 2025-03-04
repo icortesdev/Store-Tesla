@@ -1,5 +1,4 @@
----
-import { getProductsByPage } from '@/actions/products/get-products-by-page.action';
+---    
 import ProductList from '@/components/products/ProductList';
 import Pagination from '@/components/shared/Pagination.astro';
 import MainLayout from '@/layouts/MainLayout.astro';
@@ -10,7 +9,6 @@ import { actions } from 'astro:actions';
 // const {user} = session ?? {};
 
 const productsInCartCookie = Astro.cookies.get('cart')?.json() ?? [];
-console.log(productsInCartCookie);
 
 const { data , error } = await Astro.callAction(actions.getProductsByPage,{});
 
