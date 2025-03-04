@@ -59,7 +59,7 @@ try {
                 <button
                   data-id={product.productId}
                   data-size={product.size}
-                  class="text-blue-500 btn-delete"
+                  class="text-blue-500 btn-delete cursor-pointer"
                 >
                   Remover
                 </button>
@@ -101,3 +101,31 @@ try {
     </section>
 
 </MainLayout>
+
+
+
+<script>
+  import { ItemsInCart } from '@/store';
+  import { CartCookiesClient } from '@/utils';
+  import { navigate } from 'astro:transitions/client';
+  
+
+  document.addEventListener('astro:page-load', () => {
+    const deleteButtons: NodeListOf<HTMLButtonElement> =
+      document.querySelectorAll('.btn-delete');
+
+    deleteButtons.forEach((button) => {
+      button.addEventListener('click', (event) => {
+        const target = event.target as HTMLButtonElement;
+        const productId = target.dataset.id ?? '';
+        const size = target.dataset.size ?? '';
+
+        const cart = CartCookiesClient.removeItem(productId, size);
+        ItemsInCart.set(cart.length);
+
+        // window.location.reload();
+        navigate('/cart');
+      });
+    });
+  });
+</script>
