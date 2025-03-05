@@ -36,7 +36,7 @@ LIMIT ${limit} OFFSET ${(page - 1) * limit};
     const products = rows.map((product) => {
       return {
         ...product,
-        images: product.images ? product.images : "no-image.jpg",
+        images: product.images ? product.images : "no-image.png",
       };
     }) as unknown as ProductWithImages[];
 
