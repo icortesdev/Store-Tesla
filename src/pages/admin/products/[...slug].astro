@@ -3,10 +3,11 @@ import ProductImage from '@/components/products/ProductImage.astro';
 import ProductSlideshow from '@/components/products/ProductSlideshow.astro';
 import MainLayout from '@/layouts/MainLayout.astro';
 import { actions } from 'astro:actions';
-
 const {slug} = Astro.params;
+if (!slug) {
+  return Astro.redirect('/admin/dashboard');
+}
 const {data, error} = await Astro.callAction(actions.getProductBySlug, slug);
-
 
 if (error) {
   return Astro.redirect('/admin/dashboard');

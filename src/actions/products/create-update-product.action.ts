@@ -1,22 +1,47 @@
+import { ImageUpload } from "@/utils/image-upload";
 import { defineAction } from "astro:actions";
-import { db, eq, Product } from "astro:db";
+import { db, eq, Product, ProductImage } from "astro:db";
 import { z } from "astro:schema";
 import { getSession } from "auth-astro/server";
+
 import { v4 as UUID } from "uuid";
 
+const MAX_FILE_SIZE = 5_000_000; // 5MB
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/svg+xml",
+  "image/jpg",
+];
+
 export const createUpdateProduct = defineAction({
-    accept: 'form',
-    input: z.object({
-      id: z.string().optional(),
-      description: z.string(),
-      gender: z.string(),
-      price: z.number(),
-      sizes: z.string(),
-      slug: z.string(),
-      stock: z.number(),
-      tags: z.string(),
-      title: z.string(),
-      type: z.string(),
+  accept: "form",
+  input: z.object({
+    id: z.string().optional(),
+    description: z.string(),
+    gender: z.string(),
+    price: z.number(),
+    sizes: z.string(),
+    slug: z.string(),
+    stock: z.number(),
+    tags: z.string(),
+    title: z.string(),
+    type: z.string(),
+
+    imageFiles: z
+      .array(
+        z
+          .instanceof(File)
+          .refine((file) => file.size <= MAX_FILE_SIZE, "Max file size 5MB")
+          .refine((file) => {
+            if (file.size === 0) return true;
+
+            return ACCEPTED_IMAGE_TYPES.includes(file.type);
+          }, `Only supported image files are valid, ${ACCEPTED_IMAGE_TYPES.join(", ")}`)
+      )
+      .optional(),
 
     //TODO: Imagen.
   }),
@@ -28,26 +53,56 @@ export const createUpdateProduct = defineAction({
       throw new Error("Unauthorized");
     }
 
-    const { id = UUID(), ...rest } = form;
-    rest.slug = rest.slug.toLowerCase().replaceAll(' ', '-').trim();
+    const { id = UUID(), imageFiles, ...rest } = form;
+    rest.slug = rest.slug.toLowerCase().replaceAll(" ", "-").trim();
 
     const product = {
       id: id,
-      user: user.id ?? '',
+      user: user.id ?? "",
       ...rest,
     };
 
-    console.log(product);
+    const queries: any = [];
 
     if (!form.id) {
-      await db.insert(Product).values(product);
+      queries.push(db.insert(Product).values(product));
     } else {
-      await db.update(Product).set(product).where(eq(Product.id, id));
+      queries.push(db.update(Product).set(product).where(eq(Product.id, id)));
     }
 
-    //Crear producto
-    //update
-    //insertar imagenes
+    //Imagenes
+    const secureUrls: string[] = [];
+
+    if (
+      form.imageFiles &&
+      form.imageFiles.length > 0 &&
+      form.imageFiles[0].size > 0
+    ) {
+      const urls = await Promise.all(
+        form.imageFiles.map((file) => ImageUpload.upload(file))
+      );
+
+      secureUrls.push(...urls);
+    }
+
+    for (const imageUrl of secureUrls) {
+      const imageObj = {
+        id: UUID(),
+        image: imageUrl,
+        productId: product.id,
+      };
+      queries.push(db.insert(ProductImage).values(imageObj));
+    }
+
+    // if (imageFiles) {
+    //   for (const imageFile of imageFiles) {
+    //     if (imageFile.size <= 0) continue;
+
+    //     const url = await ImageUpload.upload(imageFile);
+    //   }
+    // }
+
+    await db.batch(queries);
 
     return product;
   },
